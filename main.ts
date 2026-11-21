@@ -12,7 +12,7 @@
 // Runs on Node 22. In the grader the output directory is /output; outside
 // it, MAKEFUN_OUTPUT_DIR stands in for it.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ENTRY =
@@ -42,6 +42,14 @@ function main(): void {
   }
 
   writeFileSync(join(outDir, "entry.txt"), ENTRY, "utf-8");
+
+  // Read the file back and confirm the grader will see exactly the text
+  // we checked: a write that silently truncated or re-encoded would
+  // otherwise only surface as a failed gate on the server.
+  const written = readFileSync(join(outDir, "entry.txt"), "utf-8");
+  if (written !== ENTRY) {
+    throw new Error("entry.txt read back different from the entry text");
+  }
   console.log(`wrote entry.txt (${length} characters) to ${outDir}`);
 }
 
